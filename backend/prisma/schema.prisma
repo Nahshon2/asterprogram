@@ -1,0 +1,300 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum GenerationStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum TemplateLayout {
+  PROFILE_CARD
+  BANNER
+  BROCHURE
+  PRESENTATION_SLIDE
+  SOCIAL_MEDIA
+  PRINT_READY
+}
+
+enum InputMethod {
+  MANUAL
+  UPLOAD
+  URL_SCRAPE
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  password      String
+  role          Role      @default(USER)
+  avatar        String?
+  organization  String?
+  isActive      Boolean   @default(true)
+  emailVerified Boolean   @default(false)
+
+  doctors       Doctor[]
+  generations   Generation[]
+  sessions      Session[]
+  apiKeys       ApiKey[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([email])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([token])
+  @@index([userId])
+}
+
+model ApiKey {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  key       String   @unique
+  lastUsed  DateTime?
+  isActive  Boolean  @default(true)
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([key])
+}
+
+model Doctor {
+  id               String      @id @default(cuid())
+  userId           String
+  name             String
+  title            String?     // Dr., Prof., etc.
+  specialization   String
+  subSpecialization String?
+  experience       Int?        // years
+  bio              String?     @db.Text
+  hospital         String?
+  department       String?
+  education        String[]
+  certifications   String[]
+  languages        String[]
+  phone            String?
+  email            String?
+  website          String?
+  linkedinUrl      String?
+  sourceUrl        String?     // scraped from
+  inputMethod      InputMethod @default(MANUAL)
+
+  images           DoctorImage[]
+  identityProfile  IdentityProfile?
+  generations      Generation[]
+
+  user             User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  @@index([userId])
+  @@index([name])
+}
+
+model DoctorImage {
+  id          String   @id @default(cuid())
+  doctorId    String
+  url         String   // S3/storage URL
+  thumbnailUrl String?
+  isPrimary   Boolean  @default(false)
+  width       Int?
+  height      Int?
+  fileSize    Int?
+  mimeType    String?
+  metadata    Json?    // EXIF, face detection results, etc.
+
+  doctor      Doctor   @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+
+  @@index([doctorId])
+}
+
+model IdentityProfile {
+  id              String   @id @default(cuid())
+  doctorId        String   @unique
+  faceEmbedding   Json?    // face recognition embeddings
+  colorProfile    Json?    // skin tone, hair color analysis
+  facialFeatures  Json?    // landmarks, measurements
+  consistencyScore Float?  // 0-1 confidence score
+  referenceImageId String?
+
+  doctor          Doctor   @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Template {
+  id              String         @id @default(cuid())
+  name            String
+  description     String?
+  layout          TemplateLayout
+  category        String?        // e.g., "hospital", "clinic", "luxury"
+  previewUrl      String?
+  thumbnailUrl    String?
+  isActive        Boolean        @default(true)
+  isPublic        Boolean        @default(true)
+  isPremium       Boolean        @default(false)
+  sortOrder       Int            @default(0)
+
+  config          TemplateConfig?
+  generations     Generation[]
+  hospitalThemes  HospitalTheme[]
+
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@index([layout])
+  @@index([isActive])
+}
+
+model TemplateConfig {
+  id              String   @id @default(cuid())
+  templateId      String   @unique
+
+  // Layout settings
+  canvasWidth     Int      @default(1200)
+  canvasHeight    Int      @default(800)
+  imagePosition   Json     // {x, y, width, height, borderRadius}
+  textZones       Json[]   // [{id, x, y, width, height, align, font, size, color, field}]
+
+  // Style settings
+  backgroundStyle String   @default("medical_premium") // medical_premium|navy|white_studio|custom
+  backgroundColor String?
+  backgroundGradient Json?
+  backgroundImageUrl String?
+
+  // Lighting & visual
+  lightingStyle   String   @default("soft_studio") // soft_studio|corporate_glow|natural
+  overlayOpacity  Float    @default(0.0)
+  overlayColor    String?
+
+  // Typography
+  primaryFont     String   @default("Inter")
+  secondaryFont   String   @default("Inter")
+  fontScale       Float    @default(1.0)
+
+  // Branding
+  showLogo        Boolean  @default(false)
+  logoPosition    Json?
+  accentColor     String   @default("#1E40AF")
+  secondaryColor  String   @default("#BFDBFE")
+
+  // Output
+  outputFormats   String[] @default(["png", "jpg"])
+  outputDpi       Int      @default(300)
+
+  template        Template @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model HospitalTheme {
+  id            String   @id @default(cuid())
+  name          String
+  hospitalName  String?
+  primaryColor  String
+  secondaryColor String
+  accentColor   String
+  logoUrl       String?
+  fontFamily    String   @default("Inter")
+  isDefault     Boolean  @default(false)
+
+  templates     Template[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Generation {
+  id              String           @id @default(cuid())
+  userId          String
+  doctorId        String
+  templateId      String
+  status          GenerationStatus @default(PENDING)
+
+  // Input config
+  selectedImages  String[]         // DoctorImage IDs used
+  customizations  Json?            // user overrides to template
+  hospitalThemeId String?
+
+  // Output
+  outputUrls      Json?            // {png: url, jpg: url, pdf: url}
+  outputMetadata  Json?            // dimensions, file sizes, etc.
+  errorMessage    String?
+
+  // Processing
+  jobId           String?          // Bull queue job ID
+  processingTime  Int?             // ms
+  aiProvider      String?          // which AI was used
+  promptUsed      String?          @db.Text
+
+  user            User             @relation(fields: [userId], references: [id])
+  doctor          Doctor           @relation(fields: [doctorId], references: [id])
+  template        Template         @relation(fields: [templateId], references: [id])
+
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([userId])
+  @@index([doctorId])
+  @@index([status])
+}
+
+model ScrapeJob {
+  id          String   @id @default(cuid())
+  url         String
+  userId      String
+  status      String   @default("PENDING") // PENDING|RUNNING|DONE|FAILED
+  result      Json?
+  error       String?
+  doctorId    String?  // linked doctor if extraction succeeded
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+
+model SystemSetting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String @db.Text
+  type  String @default("string") // string|number|boolean|json
+
+  updatedAt DateTime @updatedAt
+}
