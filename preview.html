@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DocIdentity Generator — UI Preview</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', sans-serif; background: #0F172A; color: #334155; }
+
+/* ── Layout chrome ── */
+.preview-nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: #1E293B; border-bottom: 1px solid #334155;
+  display: flex; align-items: center; gap: 8px; padding: 10px 20px;
+  flex-wrap: wrap;
+}
+.preview-nav span { color: #94A3B8; font-size: 12px; font-weight: 600; letter-spacing: .05em; margin-right: 4px; }
+.tab {
+  padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 500;
+  cursor: pointer; border: 1px solid #334155; background: #1E293B; color: #94A3B8;
+  transition: all .15s;
+}
+.tab:hover { background: #334155; color: #E2E8F0; }
+.tab.active { background: #2563EB; border-color: #2563EB; color: #fff; }
+.screen { display: none; margin-top: 52px; }
+.screen.active { display: block; }
+
+/* ── Common ── */
+.bg-white { background: #fff; }
+.text-xs { font-size: 11px; }
+.text-sm { font-size: 13px; }
+.text-base { font-size: 14px; }
+.text-lg { font-size: 17px; }
+.text-xl { font-size: 20px; }
+.text-2xl { font-size: 24px; }
+.text-3xl { font-size: 30px; }
+.text-4xl { font-size: 36px; }
+.font-medium { font-weight: 500; }
+.font-semibold { font-weight: 600; }
+.font-bold { font-weight: 700; }
+.font-extrabold { font-weight: 800; }
+.text-white { color: #fff; }
+.text-brand { color: #2563EB; }
+.text-muted { color: #94A3B8; }
+.text-dark { color: #1E293B; }
+.text-green { color: #16A34A; }
+.text-red { color: #DC2626; }
+.text-yellow { color: #D97706; }
+.rounded { border-radius: 6px; }
+.rounded-lg { border-radius: 10px; }
+.rounded-xl { border-radius: 14px; }
+.rounded-2xl { border-radius: 18px; }
+.rounded-full { border-radius: 9999px; }
+.border { border: 1px solid #E2E8F0; }
+.shadow-sm { box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+.shadow-lg { box-shadow: 0 10px 40px rgba(0,0,0,.15); }
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.items-start { align-items: flex-start; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+.gap-1 { gap: 4px; }
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 12px; }
+.gap-4 { gap: 16px; }
+.gap-6 { gap: 24px; }
+.gap-8 { gap: 32px; }
+.grid { display: grid; }
+.grid-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-4 { grid-template-columns: repeat(4, 1fr); }
+.w-full { width: 100%; }
+.min-w-0 { min-width: 0; }
+.flex-1 { flex: 1; }
+.flex-shrink-0 { flex-shrink: 0; }
+.truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.overflow-hidden { overflow: hidden; }
+.relative { position: relative; }
+.absolute { position: absolute; }
+.space-y-1 > * + * { margin-top: 4px; }
+.space-y-2 > * + * { margin-top: 8px; }
+.space-y-3 > * + * { margin-top: 12px; }
+.space-y-4 > * + * { margin-top: 16px; }
+.space-y-6 > * + * { margin-top: 24px; }
+.space-y-8 > * + * { margin-top: 32px; }
+
+/* ── Buttons ── */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 500;
+  cursor: pointer; border: none; transition: all .15s; text-decoration: none;
+}
+.btn-primary { background: #2563EB; color: #fff; }
+.btn-primary:hover { background: #1D4ED8; }
+.btn-outline { background: #fff; color: #334155; border: 1px solid #E2E8F0; }
+.btn-outline:hover { background: #F8FAFC; }
+.btn-ghost { background: transparent; color: #64748B; }
+.btn-ghost:hover { background: #F1F5F9; }
+.btn-sm { padding: 5px 12px; font-size: 12px; border-radius: 6px; }
+.btn-lg { padding: 12px 24px; font-size: 15px; border-radius: 10px; }
+.btn-icon { width: 34px; height: 34px; padding: 0; border-radius: 8px; justify-content: center; }
+.btn-destructive { background: #EF4444; color: #fff; }
+
+/* ── Cards ── */
+.card {
+  background: #fff; border-radius: 14px; border: 1px solid #E2E8F0;
+  box-shadow: 0 1px 4px rgba(0,0,0,.05);
+}
+.card-header { padding: 20px 24px 0; }
+.card-title { font-size: 15px; font-weight: 600; color: #1E293B; }
+.card-body { padding: 20px 24px; }
+
+/* ── Badges ── */
+.badge {
+  display: inline-flex; align-items: center; padding: 2px 8px;
+  border-radius: 9999px; font-size: 11px; font-weight: 600;
+}
+.badge-blue { background: #DBEAFE; color: #1D4ED8; }
+.badge-green { background: #DCFCE7; color: #15803D; }
+.badge-yellow { background: #FEF3C7; color: #B45309; }
+.badge-red { background: #FEE2E2; color: #B91C1C; }
+.badge-purple { background: #EDE9FE; color: #6D28D9; }
+.badge-pink { background: #FCE7F3; color: #9D174D; }
+.badge-orange { background: #FED7AA; color: #C2410C; }
+.badge-gray { background: #F1F5F9; color: #475569; }
+.badge-premium { background: linear-gradient(135deg,#F59E0B,#EF4444); color: #fff; }
+
+/* ── Inputs ── */
+.input {
+  width: 100%; height: 36px; padding: 0 12px; border-radius: 8px;
+  border: 1px solid #E2E8F0; font-size: 13px; color: #334155;
+  background: #fff; outline: none; font-family: inherit;
+}
+.input:focus { border-color: #2563EB; box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
+.textarea {
+  width: 100%; padding: 10px 12px; border-radius: 8px;
+  border: 1px solid #E2E8F0; font-size: 13px; color: #334155;
+  background: #fff; outline: none; font-family: inherit; resize: vertical; min-height: 80px;
+}
+.label { display: block; font-size: 12px; font-weight: 500; color: #374151; margin-bottom: 6px; }
+
+/* ── Sidebar ── */
+.sidebar {
+  width: 240px; height: 100vh; background: #fff; border-right: 1px solid #E2E8F0;
+  position: fixed; left: 0; top: 52px; display: flex; flex-direction: column; z-index: 10;
+}
+.sidebar-logo { padding: 18px 20px; border-bottom: 1px solid #E2E8F0; display: flex; align-items: center; gap: 10px; }
+.logo-icon { width: 32px; height: 32px; background: #2563EB; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+.logo-icon svg { color: #fff; }
+.sidebar-nav { flex: 1; padding: 12px; overflow-y: auto; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px;
+  font-size: 13px; font-weight: 500; color: #64748B; cursor: pointer; margin-bottom: 2px;
+  transition: all .1s; text-decoration: none;
+}
+.nav-item:hover { background: #F0F7FF; color: #2563EB; }
+.nav-item.active { background: #EFF6FF; color: #2563EB; }
+.nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+.nav-section { padding: 12px 12px 4px; font-size: 10px; font-weight: 700; color: #94A3B8; letter-spacing: .1em; text-transform: uppercase; }
+.sidebar-user { padding: 12px 16px; border-top: 1px solid #E2E8F0; display: flex; align-items: center; gap: 10px; }
+.user-avatar { width: 32px; height: 32px; border-radius: 50%; background: #2563EB; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+.main { margin-left: 240px; padding: 28px 32px; background: #F8FAFC; min-height: calc(100vh - 52px); }
+
+/* ── Stat cards ── */
+.stat-card { padding: 20px; background: #fff; border-radius: 14px; border: 1px solid #E2E8F0; }
+.stat-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+.stat-value { font-size: 28px; font-weight: 700; color: #1E293B; margin-bottom: 2px; }
+.stat-label { font-size: 12px; color: #94A3B8; }
+
+/* ── Doctor card ── */
+.doctor-card {
+  background: #fff; border-radius: 14px; border: 1px solid #E2E8F0;
+  padding: 18px; transition: box-shadow .15s;
+}
+.doctor-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,.08); }
+.doctor-photo {
+  width: 56px; height: 56px; border-radius: 12px; background: #DBEAFE;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  overflow: hidden; font-size: 22px; font-weight: 700; color: #2563EB;
+}
+.doctor-photo img { width: 56px; height: 56px; object-fit: cover; }
+
+/* ── Template card ── */
+.template-card { background: #fff; border-radius: 14px; border: 1px solid #E2E8F0; overflow: hidden; cursor: pointer; transition: box-shadow .15s; }
+.template-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,.10); }
+.template-preview {
+  height: 130px; display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+}
+
+/* ── Status badges ── */
+.status-completed { background: #DCFCE7; color: #15803D; }
+.status-processing { background: #DBEAFE; color: #1D4ED8; }
+.status-failed { background: #FEE2E2; color: #B91C1C; }
+.status-pending { background: #FEF3C7; color: #B45309; }
+
+/* ── Progress bar ── */
+.progress-bar { height: 6px; background: #E2E8F0; border-radius: 9999px; overflow: hidden; }
+.progress-fill { height: 100%; background: #2563EB; border-radius: 9999px; }
+
+/* ── Form group ── */
+.form-group { margin-bottom: 16px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+.form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+
+/* ── Step indicator ── */
+.step-badge { padding: 5px 14px; border-radius: 9999px; font-size: 12px; font-weight: 600; }
+.step-active { background: #2563EB; color: #fff; }
+.step-done { background: #DCFCE7; color: #15803D; }
+.step-inactive { background: #F1F5F9; color: #94A3B8; }
+
+/* ── Table ── */
+.table { width: 100%; border-collapse: collapse; }
+.table th { text-align: left; padding: 10px 16px; font-size: 11px; font-weight: 600; color: #94A3B8; text-transform: uppercase; letter-spacing: .05em; border-bottom: 1px solid #E2E8F0; }
+.table td { padding: 14px 16px; font-size: 13px; border-bottom: 1px solid #F1F5F9; }
+.table tr:last-child td { border-bottom: none; }
+.table tr:hover td { background: #FAFBFC; }
+
+/* ── Divider ── */
+.divider { height: 1px; background: #E2E8F0; margin: 0; }
+
+/* ── Dropzone ── */
+.dropzone {
+  border: 2px dashed #CBD5E1; border-radius: 12px; padding: 32px;
+  text-align: center; cursor: pointer; transition: all .15s;
+}
+.dropzone:hover { border-color: #2563EB; background: #F0F7FF; }
+
+/* ── Icons SVG ── */
+.icon { width: 16px; height: 16px; display: inline-block; vertical-align: middle; }
+
+/* ====== SCREEN SPECIFIC ====== */
+
+/* Landing */
+#landing { background: #fff; }
+.hero { background: linear-gradient(160deg, #0F172A 0%, #1E3A8A 60%, #1D4ED8 100%); padding: 80px 60px 100px; text-align: center; }
+.hero-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); padding: 6px 16px; border-radius: 9999px; color: #93C5FD; font-size: 12px; font-weight: 600; margin-bottom: 28px; }
+.hero h1 { font-size: 52px; font-weight: 800; color: #fff; line-height: 1.1; margin-bottom: 20px; max-width: 700px; margin-left: auto; margin-right: auto; }
+.hero h1 span { color: #60A5FA; }
+.hero p { font-size: 18px; color: #BFDBFE; max-width: 580px; margin: 0 auto 36px; line-height: 1.6; }
+.hero-btns { display: flex; gap: 12px; justify-content: center; }
+.hero-btn-primary { background: #fff; color: #1E3A8A; padding: 14px 28px; border-radius: 12px; font-size: 15px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 20px rgba(0,0,0,.2); }
+.hero-btn-secondary { background: transparent; color: #fff; padding: 14px 28px; border-radius: 12px; font-size: 15px; font-weight: 600; border: 1px solid rgba(255,255,255,.3); display: inline-flex; align-items: center; gap: 8px; }
+.features { padding: 80px 60px; background: #F8FAFC; }
+.features h2 { font-size: 30px; font-weight: 700; color: #1E293B; text-align: center; margin-bottom: 8px; }
+.features p { text-align: center; color: #64748B; margin-bottom: 48px; }
+.feat-card { background: #fff; border-radius: 16px; border: 1px solid #E2E8F0; padding: 28px; }
+.feat-icon { width: 48px; height: 48px; background: #EFF6FF; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
+.templates-section { padding: 80px 60px; background: #fff; }
+.cta { background: #2563EB; padding: 72px 60px; text-align: center; }
+.landing-footer { background: #0F172A; padding: 28px 60px; display: flex; align-items: center; justify-content: space-between; }
+
+/* Login */
+#login { background: linear-gradient(160deg, #0F172A 0%, #1E3A8A 60%, #1D4ED8 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px; }
+.login-card { background: #fff; border-radius: 20px; padding: 36px; width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,.3); }
+.login-logo { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 32px; }
+.login-logo-icon { width: 44px; height: 44px; background: #fff; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(37,99,235,.3); }
+.pass-field { position: relative; }
+.pass-toggle { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #94A3B8; cursor: pointer; }
+.demo-box { background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 10px; padding: 12px 14px; margin-top: 20px; }
+
+/* Dashboard */
+#dashboard, #doctors, #new-doctor, #generate, #generations, #templates-page, #admin-page { display: flex; min-height: calc(100vh - 52px); }
+.page-content { flex: 1; margin-left: 240px; padding: 28px 32px; background: #F8FAFC; }
+
+/* Generation steps */
+.step-card { border: 2px solid #E2E8F0; border-radius: 12px; padding: 16px; cursor: pointer; transition: all .15s; }
+.step-card:hover { border-color: #93C5FD; background: #F0F9FF; }
+.step-card.selected { border-color: #2563EB; background: #EFF6FF; }
+
+/* Identity box */
+.identity-box { background: #F0F9FF; border: 1px solid #BAE6FD; border-radius: 12px; padding: 18px; }
+.identity-check { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #0C4A6E; margin-bottom: 8px; }
+.identity-check:last-child { margin-bottom: 0; }
+.check-icon { width: 18px; height: 18px; background: #0284C7; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+/* Output card */
+.output-card { background: #fff; border: 1px solid #E2E8F0; border-radius: 14px; overflow: hidden; }
+.output-preview { height: 200px; background: linear-gradient(135deg, #1E3A8A, #2563EB); display: flex; align-items: center; justify-content: center; position: relative; }
+.output-overlay { position: absolute; inset: 0; background: url("data:image/svg+xml,%3Csvg opacity='0.05' xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ccircle cx='30' cy='30' r='20' fill='white'/%3E%3C/svg%3E") repeat; }
+</style>
+</head>
+<body>
+
+<!-- ── Navigation Tabs ── -->
+<nav class="preview-nav">
+  <span>UI PREVIEW</span>
+  <button class="tab active" onclick="show('landing',this)">🏠 Landing</button>
+  <button class="tab" onclick="show('login',this)">🔐 Login</button>
+  <button class="tab" onclick="show('dashboard',this)">📊 Dashboard</button>
+  <button class="tab" onclick="show('doctors',this)">👨‍⚕️ Doctors</button>
+  <button class="tab" onclick="show('new-doctor',this)">➕ Add Doctor</button>
+  <button class="tab" onclick="show('generate',this)">⚡ Generate</button>
+  <button class="tab" onclick="show('generations',this)">📁 History</button>
+  <button class="tab" onclick="show('templates-page',this)">🎨 Templates</button>
+  <button class="tab" onclick="show('admin-page',this)">🛡️ Admin</button>
+</nav>
+
+<!-- ════════════════════════════════
+     SCREEN 1 — LANDING PAGE
+════════════════════════════════ -->
+<div id="landing" class="screen active">
+  <!-- Navbar -->
+  <div style="position:sticky;top:52px;z-index:5;background:rgba(255,255,255,.95);backdrop-filter:blur(8px);border-bottom:1px solid #E2E8F0;padding:14px 60px;display:flex;align-items:center;justify-content:space-between;">
+    <div class="flex items-center gap-2">
+      <div style="width:30px;height:30px;background:#2563EB;border-radius:7px;display:flex;align-items:center;justify-content:center;">
+        <svg width="18" height="18" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2L12 8M8 5L16 5M6 10h12l-1 9H7L6 10z"/></svg>
+      </div>
+      <span style="font-size:15px;font-weight:700;color:#1E3A8A;">DocIdentity</span>
+      <span style="font-size:11px;color:#94A3B8;margin-left:2px;">Generator</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <a class="btn btn-ghost btn-sm" href="#">Sign In</a>
+      <a class="btn btn-primary btn-sm" href="#">Get Started Free</a>
+    </div>
+  </div>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-badge">
+      <svg width="13" height="13" fill="#FCD34D" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      Hospital Branding Automation Engine
+    </div>
+    <h1>Professional Doctor Visuals,<br><span>Identity Preserved</span></h1>
+    <p>Upload doctor photos, paste a profile URL, or fill in details — and instantly generate premium, branded doctor profile images. Same face, every time.</p>
+    <div class="hero-btns">
+      <a class="hero-btn-primary" href="#">Start Generating Free →</a>
+      <a class="hero-btn-secondary" href="#">Sign In to Dashboard</a>
+    </div>
+  </div>
+
+  <!-- Features -->
+  <div class="features">
+    <h2>Everything hospitals need for doctor branding</h2>
+    <p>Three ways to add doctors. Five template formats. One consistent identity.</p>
+    <div class="grid grid-3 gap-6">
+      <div class="feat-card">
+        <div class="feat-icon"><svg width="24" height="24" fill="none" stroke="#2563EB" stroke-width="2" viewBox="0 0 24 24"><path d="M12 3v10m-4-4l4 4 4-4M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></div>
+        <h3 class="font-semibold text-dark" style="margin-bottom:8px">AI-Powered Generation</h3>
+        <p class="text-sm text-muted" style="line-height:1.6">Generate professional doctor visuals in seconds using advanced AI with full identity preservation across all templates.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><svg width="24" height="24" fill="none" stroke="#2563EB" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <h3 class="font-semibold text-dark" style="margin-bottom:8px">Identity Preservation</h3>
+        <p class="text-sm text-muted" style="line-height:1.6">The same real doctor — exact face, skin tone, features — in every template. No generic avatars, no altered identity.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><svg width="24" height="24" fill="none" stroke="#2563EB" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg></div>
+        <h3 class="font-semibold text-dark" style="margin-bottom:8px">Multi-Format Output</h3>
+        <p class="text-sm text-muted" style="line-height:1.6">Export as PNG, JPG, PDF, or print-ready files at 300 DPI. Banners, brochures, slides, social posts — all covered.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input methods + templates grid -->
+  <div class="templates-section">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;max-width:1000px;margin:0 auto;">
+      <div>
+        <h2 class="text-2xl font-bold text-dark" style="margin-bottom:24px">Three ways to add doctor data</h2>
+        <div class="space-y-6">
+          <div class="flex gap-4">
+            <div style="width:40px;height:40px;background:#2563EB;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700;flex-shrink:0;">01</div>
+            <div><p class="font-semibold text-dark" style="margin-bottom:4px">Manual Form</p><p class="text-sm text-muted">Fill in name, specialization, hospital, bio, and contact details directly.</p></div>
+          </div>
+          <div class="flex gap-4">
+            <div style="width:40px;height:40px;background:#2563EB;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700;flex-shrink:0;">02</div>
+            <div><p class="font-semibold text-dark" style="margin-bottom:4px">Upload Photos</p><p class="text-sm text-muted">Upload up to 10 high-quality doctor photos. Identity is locked from the primary image.</p></div>
+          </div>
+          <div class="flex gap-4">
+            <div style="width:40px;height:40px;background:#2563EB;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700;flex-shrink:0;">03</div>
+            <div><p class="font-semibold text-dark" style="margin-bottom:4px">Paste Profile URL</p><p class="text-sm text-muted">Paste a hospital website or LinkedIn URL. System auto-extracts all details and photo.</p></div>
+          </div>
+        </div>
+      </div>
+      <div style="background:linear-gradient(145deg,#0F172A,#1E3A8A);border-radius:20px;padding:28px;">
+        <p class="text-sm font-semibold" style="color:#93C5FD;margin-bottom:20px;">Available Templates</p>
+        <div class="space-y-4">
+          <div class="flex items-center gap-3"><div style="width:10px;height:10px;background:#60A5FA;border-radius:50%;flex-shrink:0;"></div><div><p class="text-sm font-medium text-white">Professional Profile Card</p><p style="font-size:11px;color:#93C5FD;">Corporate medical profile for websites</p></div></div>
+          <div class="flex items-center gap-3"><div style="width:10px;height:10px;background:#60A5FA;border-radius:50%;flex-shrink:0;"></div><div><p class="text-sm font-medium text-white">Hospital Website Banner</p><p style="font-size:11px;color:#93C5FD;">1400×500px wide format</p></div></div>
+          <div class="flex items-center gap-3"><div style="width:10px;height:10px;background:#60A5FA;border-radius:50%;flex-shrink:0;"></div><div><p class="text-sm font-medium text-white">Medical Brochure Panel</p><p style="font-size:11px;color:#93C5FD;">A4 print-ready PDF output</p></div></div>
+          <div class="flex items-center gap-3"><div style="width:10px;height:10px;background:#60A5FA;border-radius:50%;flex-shrink:0;"></div><div><p class="text-sm font-medium text-white">Presentation Slide</p><p style="font-size:11px;color:#93C5FD;">16:9 widescreen format</p></div></div>
+          <div class="flex items-center gap-3"><div style="width:10px;height:10px;background:#60A5FA;border-radius:50%;flex-shrink:0;"></div><div><p class="text-sm font-medium text-white">Social Media Post</p><p style="font-size:11px;color:#93C5FD;">LinkedIn & Instagram square</p></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta">
+    <h2 class="text-3xl font-bold text-white" style="margin-bottom:12px">Ready to automate your hospital's doctor branding?</h2>
+    <p style="color:#BFDBFE;font-size:16px;margin-bottom:28px">Join hospitals and clinics generating professional doctor visuals in minutes, not days.</p>
+    <a class="hero-btn-primary" href="#">Create Free Account →</a>
+  </div>
+
+  <div class="landing-footer">
+    <div class="flex items-center gap-2"><span style="font-size:14px;font-weight:700;color:#fff">DocIdentity Generator</span></div>
+    <p style="color:#475569;font-size:12px">© 2025 DocIdentity. Hospital Branding Automation Platform.</p>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     SCREEN 2 — LOGIN
+════════════════════════════════ -->
+<div id="login" class="screen">
+  <div style="background:linear-gradient(160deg,#0F172A,#1E3A8A,#1D4ED8);min-height:calc(100vh - 52px);display:flex;align-items:center;justify-content:center;padding:40px;">
+    <div>
+      <div class="login-logo">
+        <div class="login-logo-icon" style="background:#2563EB;width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;">
+          <svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2L12 8M8 5L16 5M6 10h12l-1 9H7L6 10z"/></svg>
+        </div>
+        <div>
+          <p style="color:#fff;font-size:17px;font-weight:700;line-height:1;">DocIdentity</p>
+          <p style="color:#93C5FD;font-size:11px;">Generator Platform</p>
+        </div>
+      </div>
+      <div class="login-card">
+        <h1 class="text-xl font-bold text-dark" style="margin-bottom:4px;">Welcome back</h1>
+        <p class="text-sm text-muted" style="margin-bottom:24px;">Sign in to your account</p>
+
+        <div class="form-group">
+          <label class="label">Email address</label>
+          <input class="input" type="email" value="demo@hospital.com" />
+        </div>
+        <div class="form-group">
+          <label class="label">Password</label>
+          <div class="pass-field">
+            <input class="input" type="password" value="Demo@123!" style="padding-right:36px;" />
+            <span class="pass-toggle">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </span>
+          </div>
+        </div>
+        <button class="btn btn-primary w-full" style="height:40px;justify-content:center;font-size:14px;margin-top:4px;">Sign In</button>
+
+        <p class="text-sm text-muted" style="text-align:center;margin-top:20px;">Don't have an account? <a href="#" style="color:#2563EB;font-weight:500;">Create one free</a></p>
+
+        <div class="demo-box">
+          <p class="text-xs font-semibold" style="color:#1D4ED8;margin-bottom:6px;">Demo Credentials</p>
+          <p class="text-xs" style="color:#2563EB;">User: demo@hospital.com / Demo@123!</p>
+          <p class="text-xs" style="color:#2563EB;">Admin: admin@docidentity.com / Admin@123!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     SCREEN 3 — DASHBOARD
+════════════════════════════════ -->
+<div id="dashboard" class="screen">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon"><svg width="18" height="18" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2L12 8M8 5L16 5M6 10h12l-1 9H7L6 10z"/></svg></div>
+      <div><p style="font-size:13px;font-weight:700;color:#1E3A8A;line-height:1;">DocIdentity</p><p style="font-size:10px;color:#94A3B8;">Generator</p></div>
+    </div>
+    <div class="sidebar-nav">
+      <a class="nav-item active">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a>
+      <a class="nav-item">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2L12 8M8 5L16 5M6 10h12l-1 9H7L6 10z"/></svg>
+        Doctors
+      </a>
+      <a class="nav-item">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Templates
+      </a>
+      <a class="nav-item">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 3l1.5 4.5H18l-3.75 2.75 1.5 4.5L12 12.5l-3.75 2.25 1.5-4.5L6 7.5h4.5L12 3z"/></svg>
+        Generate
+      </a>
+      <a class="nav-item">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="12 8 12 12 14 14"/><circle cx="12" cy="12" r="10"/></svg>
+        History
+      </a>
+      <a class="nav-item">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>
+        Settings
+      </a>
+      <div class="nav-section">Administration</div>
+      <a class="nav-item">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Admin Panel
+      </a>
+    </div>
+    <div class="sidebar-user">
+      <div class="user-avatar">DH</div>
+      <div class="min-w-0 flex-1">
+        <p style="font-size:12px;font-weight:600;color:#1E293B;truncate">Demo Hospital</p>
+        <p style="font-size:11px;color:#94A3B8;truncate">demo@hospital.com</p>
+      </div>
+      <svg width="14" height="14" fill="none" stroke="#94A3B8" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="page-content">
+    <div style="margin-bottom:28px;">
+      <h1 class="text-2xl font-bold text-dark">Good morning, Demo 👋</h1>
+      <p class="text-sm text-muted" style="margin-top:4px;">City General Hospital — your branding dashboard</p>
+    </div>
+
+    <!-- Quick actions -->
+    <div class="grid grid-3 gap-4" style="margin-bottom:24px;">
+      <div style="background:linear-gradient(135deg,#1E40AF,#2563EB);border-radius:14px;padding:22px;cursor:pointer;">
+        <div style="width:40px;height:40px;background:rgba(255,255,255,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;">
+          <svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2L12 8M8 5L16 5M6 10h12l-1 9H7L6 10z"/></svg>
+        </div>
+        <h3 class="font-semibold text-white" style="margin-bottom:4px;">Add Doctor</h3>
+        <p style="font-size:12px;color:#BFDBFE;">Manual form, upload photos, or paste a URL</p>
+        <p style="font-size:12px;color:#BFDBFE;margin-top:14px;">Get started →</p>
+      </div>
+      <div class="card" style="padding:22px;cursor:pointer;">
+        <div style="width:40px;height:40px;background:#EFF6FF;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;">
+          <svg width="20" height="20" fill="none" stroke="#2563EB" stroke-width="2" viewBox="0 0 24 24"><path d="M12 3l1.5 4.5H18l-3.75 2.75 1.5 4.5L12 12.5l-3.75 2.25 1.5-4.5L6 7.5h4.5L12 3z"/></svg>
+        </div>
+        <h3 class="font-semibold text-dark" style="margin-bottom:4px;">Generate Visual</h3>
+        <p class="text-sm text-muted">Select a doctor and template, generate instantly</p>
+        <p style="font-size:12px;color:#2563EB;margin-top:14px;">Generate now →</p>
+      </div>
+      <div class="card" style="padding:22px;cursor:pointer;">
+        <div style="width:40px;height:40px;background:#EFF6FF;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;">
+          <svg width="20" height="20" fill="none" stroke="#2563EB" stroke-width="2" viewBox="0 0 24 24"><polyline points="12 8 12 12 14 14"/><circle cx="12" cy="12" r="10"/></svg>
+        </div>
+        <h3 class="font-semibold text-dark" style="margin-bottom:4px;">View History</h3>
+        <p class="text-sm text-muted">Download and manage previous outputs</p>
+        <p style="font-size:12px;color:#2563EB;margin-top:14px;">View all →</p>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-4 gap-4" style="margin-bottom:24px;">
+      <div class="stat-card">
+        <div class="flex items-center justify-between">
+          <div><div class="stat-value">12</div><div class="stat-label">Total Doctors</div></div>
+          <div class="stat-icon" style="background:#EFF6FF;"><svg width="22" height="22" fill="none" stroke="#2563EB" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2L12 8M8 5L16 5M6 10h12l-1 9H7L6 10z"/></svg></div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="flex items-center justify-between">
+          <div><div class="stat-value">47</div><div class="stat-label">Generated</div></div>
+          <div class="stat-icon" style="background:#DCFCE7;"><svg width="22" height="22" fill="none" stroke="#16A34A" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="flex items-center justify-between">
+          <div><div class="stat-value">2</div><div class="stat-label">Processing</div></div>
+          <div class="stat-icon" style="background:#FEF3C7;"><svg width="22" height="22" fill="none" stroke="#D97706" stroke-width="2" viewBox="0 0 24 24"><polyline points="12 8 12 12 14 14"/><circle cx="12" cy="12" r="10"/></svg></div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="flex items-center justify-between">
+          <div><div class="stat-value">1</div><div class="stat-label">Failed</div></div>
+          <div class="stat-icon" style="background:#FEE2E2;"><svg width="22" height="22" fill="none" stroke="#DC2626" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom grid -->
+    <div class="grid gap-6" style="grid-template-columns:1fr 1fr;">
+      <div class="card">
+        <div class="card-header flex items-center justify-between" style="padding-bottom:14px;">
+          <span class="card-title">Recent Doctors</span>
+          <button class="btn btn-ghost btn-sm">View all</button>
+        </div>
+        <div class="card-body" style="padding-top:0;">
+          <div class="space-y-2">
+            <div class="flex items-center gap-3" style="padding:10px;border-radius:8px;background:#F8FAFC;">
+              <div class="doctor-photo" style="width:40px;height:40px;border-radius:10px;font-size:16px;">A</div>
+              <div class="flex-1 min-w-0"><p class="text-sm font-medium text-dark truncate">Dr. Amara Okonkwo</p><p class="text-xs text-muted">Cardiology</p></div>
+              <span class="text-xs text-muted">4 gen</span>
+            </div>
+            <div class="flex items-center gap-3" style="padding:10px;border-radius:8px;background:#F8FAFC;">
+              <div class="doctor-photo" style="width:40px;height:40px;border-radius:10px;font-size:16px;">R</div>
+              <div class="flex-1 min-w-0"><p class="text-sm font-medium text-dark truncate">Dr. Raj Patel</p><p class="text-xs text-muted">Neurology</p></div>
+              <span class="text-xs text-muted">7 gen</span>
+            </div>
+            <div class="flex items-center gap-3" style="padding:10px;border-radius:8px;background:#F8FAFC;">
+              <div class="doctor-photo" style="width:40px;height:40px;border-radius:10px;font-size:16px;">S</div>
+              <div class="flex-1 min-w-0"><p class="text-sm font-medium text-dark truncate">Dr. Sofia Mendez</p><p class="text-xs text-muted">Orthopedic Surgery</p></div>
+              <span class="text-xs text-muted">2 gen</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header flex items-center justify-between" style="padding-bottom:14px;">
+          <span class="card-title">Recent Generations</span>
+          <button class="btn btn-ghost btn-sm">View all</button>
+        </div>
+        <div class="card-body" style="padding-top:0;">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between" style="padding:10px;border-radius:8px;background:#F8FAFC;">
+              <div><p class="text-sm font-medium text-dark">Dr. Amara Okonkwo</p><p class="text-xs text-muted">Profile Card · 5 min ago</p></div>
+              <span class="badge badge-green">completed</span>
+            </div>
+            <div class="flex items-center justify-between" style="padding:10px;border-radius:8px;background:#F8FAFC;">
+              <div><p class="text-sm font-medium text-dark">Dr. Raj Patel</p><p class="text-xs text-muted">Hospital Banner · 12 min ago</p></div>
+              <span class="badge badge-blue">processing</span>
+            </div>
+            <div class="flex items-center justify-between" style="padding:10px;border-radius:8px;background:#F8FAFC;">
+              <div><p class="text-sm font-medium text-dark">Dr. Sofia Mendez</p><p class="text-xs text-muted">Brochure · 1 hr ago</p></div>
+              <span class="badge badge-green">completed</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     SCREEN 4 — DOCTORS LIST
+════════════════════════════════ -->
+<div id="doctors" class="screen">
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon"><svg width="18" height="18" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2L12 8M8 5L16 5M6 10h12l-1 9H7L6 10z"/></svg></div>
+      <div><p style="font-size:13px;font-weight:700;color:#1E3A8A;line-height:1;">DocIdentity</p><p style="font-size:10px;color:#94A3B8;">Generator</p></div>
+    </div>
+    <div class="sidebar-nav">
+      <a class="nav-item">Dashboard</a>
+      <a class="nav-item active">Doctors</a>
+      <a class="nav-item">Templates</a>
+      <a class="nav-item">Generate</a>
+      <a class="nav-item">History</a>
+      <a class="nav-item">Settings</a>
+    </div>
+    <div class="sidebar-user"><div class="user-avatar">DH</div><div class="min-w-0 flex-1"><p style="font-size:12px;font-weight:600;color:#1E293B;">Demo Hospital</p><p style="font-size:11px;color:#94A3B8;">demo@hospital.com</p></div></div>
+  </div>
+  <div class="page-content">
+    <div class="flex items-center justify-between" style="margin-bottom:20px;">
+      <div><h1 class="text-2xl font-bold text-dark">Doctors</h1><p class="text-sm text-muted" style="margin-top:3px;">12 doctors in your library</p></div>
+      <button class="btn btn-primary"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Doctor</button>
+    </div>
+    <div style="position:relative;max-width:340px;margin-bottom:20px;">
+      <svg style="position:absolute;left:11px;top:50%;transform:translateY(-50%);color:#94A3B8;" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input class="input" style="padding-left:34px;" placeholder="Search doctors by name..." />
+    </div>
+    <div class="grid grid-3 gap-4">
+      <!-- Doctor cards -->
+      <div class="doctor-card">
+        <div class="flex gap-3 items-start" style="margin-bottom:14px;">
+          <div class="doctor-photo">A</div>
+          <div class="flex-1 min-w-0">
+            <h3 class="text-sm font-semibold text-dark truncate">Dr. Amara Okonkwo</h3>
+            <p style="font-size:12px;color:#2563EB;font-weight:500;">Cardiology</p>
+            <p class="text-xs text-muted truncate">City General Hospital</p>
+            <div class="flex items-center gap-2" style="margin-top:6px;"><span class="text-xs text-muted">Manual · 4 generations</span></div>
+          </div>
+        </div>
+        <div class="flex gap-2" style="padding-top:12px;border-top:1px solid #F1F5F9;">
+          <button class="btn btn-primary btn-sm flex-1" style="justify-content:center;"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 3l1.5 4.5H18l-3.75 2.75 1.5 4.5L12 12.5l-3.75 2.25 1.5-4.5L6 7.5h4.5L12 3z"/></svg> Generate</button>
+          <button class="btn btn-outline btn-icon"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+          <button class="btn btn-ghost btn-icon" style="color:#94A3B8;"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></button>
+        </div>
+      </div>
+      <div class="doctor-card">
+        <div class="flex gap-3 items-start" style="margin-bottom:14px;">
+          <div class="doctor-photo" style="background:#EDE9FE;color:#6D28D9;">R</div>
+          <div class="flex-1 min-w-0">
+            <h3 class="text-sm font-semibold text-dark truncate">Dr. Raj Patel</h3>
+            <p style="font-size:12px;color:#2563EB;font-weight:500;">Neurology</p>
+            <p class="text-xs text-muted truncate">Metro Medical Center</p>
+            <div class="flex items-center gap-2" style="margin-top:6px;"><span class="text-xs text-muted">Scraped · 7 generations</span></div>
+          </div>
+        </div>
+        <div class="flex gap-2" style="padding-top:12px;border-top:1px solid #F1F5F9;">
+          <button class="btn btn-primary btn-sm flex-1" style="justify-content:center;">Generate</button>
+          <button class="btn btn-outline btn-icon"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+          <button class="btn btn-ghost btn-icon" style="color:#94A3B8;"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></button>
+        </div>
+      </div>
+      <div class="doctor-card">
+        <div class="flex gap-3 items-start" style="margin-bottom:14px;">
+          <div class="doctor-photo" style="background:#DCFCE7;color:#15803D;">S</div>
+          <div class="flex-1 min-w-0">
+            <h3 class="text-sm font-semibold text-dark truncate">Dr. Sofia Mendez</h3>
+            <p style="font-size:12px;color:#2563EB;font-weight:500;">Orthopedic Surgery</p>
+            <p class="text-xs text-muted truncate">St. Mary's Hospital</p>
+            <div class="flex items-center gap-2" style="margin-top:6px;"><span class="text-xs text-muted">Upload · 2 generations</span></div>
+          </div>
+        </div>
+        <div class="flex gap-2" style="padding-top:12px;border-top:1px solid #F1F5F9;">
+          <button class="btn btn-primary btn-sm flex-1" style="justify-content:center;">Generate</button>
+          <button class="btn btn-outline btn-icon"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+          <button class="btn btn-ghost btn-icon" style="color:#94A3B8;"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     SCREEN 5 — ADD DOCTOR
+════════════════════════════════ -->
+<div id="new-doctor" class="screen">
+  <div class="sidebar">
+    <div class="sidebar-logo"><div class="logo-icon"><svg width="18" height="18" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2L12 8M8 5L16 5M6 10h12l-1 9H7L6 10z"/></svg></div><div><p style="font-size:13px;font-weight:700;color:#1E3A8A;line-height:1;">DocIdentity</p></div></div>
+    <div class="sidebar-nav"><a class="nav-item">Dashboard</a><a class="nav-item active">Doctors</a><a class="nav-item">Templates</a><a class="nav-item">Generate</a></div>
+    <div class="sidebar-user"><div class="user-avatar">DH</div><div class="min-w-0 flex-1"><p style="font-size:12px;font-weight:600;color:#1E293B;">Demo Hospital</p></div></div>
+  </div>
+  <div class="page-content" style="max-width:740px;">
+    <a class="text-sm text-muted flex items-center gap-1" style="margin-bottom:16px;cursor:pointer;">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> Back to Doctors
+    </a>
+    <h1 class="text-2xl font-bold text-dark" style="margin-bottom:4px;">Add Doctor</h1>
+    <p class="text-sm text-muted" style="margin-bottom:20px;">Choose how you want to add doctor information</p>
+
+    <!-- Method tabs -->
+    <div class="grid grid-3 gap-3" style="margin-bottom:20px;">
+      <div style="border:2px solid #2563EB;border-radius:12px;padding:16px;text-align:center;background:#EFF6FF;cursor:pointer;">
+        <svg width="22" height="22" fill="none" stroke="#2563EB" stroke-width="2" viewBox="0 0 24 24" style="margin:0 auto 8px;"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <p class="text-sm font-semibold" style="color:#2563EB;">Manual Entry</p>
+        <p style="font-size:11px;color:#60A5FA;">Fill in doctor details</p>
+      </div>
+      <div style="border:2px solid #E2E8F0;border-radius:12px;padding:16px;text-align:center;cursor:pointer;">
+        <svg width="22" height="22" fill="none" stroke="#94A3B8" stroke-width="2" viewBox="0 0 24 24" style="margin:0 auto 8px;"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></svg>
+        <p class="text-sm font-semibold text-muted">Upload Photos</p>
+        <p style="font-size:11px;color:#CBD5E1;">From doctor photos</p>
+      </div>
+      <div style="border:2px solid #E2E8F0;border-radius:12px;padding:16px;text-align:center;cursor:pointer;">
+        <svg width="22" height="22" fill="none" stroke="#94A3B8" stroke-width="2" viewBox="0 0 24 24" style="margin:0 auto 8px;"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+        <p class="text-sm font-semibold text-muted">Profile URL</p>
+        <p style="font-size:11px;color:#CBD5E1;">Auto-extract from web</p>
+      </div>
+    </div>
+
+    <!-- Manual form -->
+    <div class="card">
+      <div class="card-body">
+        <div class="form-row" style="grid-template-columns:100px 1fr;">
+          <div><label class="label">Title</label><input class="input" value="Dr." /></div>
+          <div><label class="label">Full Name <span style="color:#EF4444;">*</span></label><input class="input" value="Amara Okonkwo" /></div>
+        </div>
+        <div class="form-row">
+          <div><label class="label">Specialization <span style="color:#EF4444;">*</span></label><input class="input" value="Cardiology" /></div>
+          <div><label class="label">Sub-Specialization</label><input class="input" placeholder="Interventional Cardiology" /></div>
+        </div>
+        <div class="form-row">
+          <div><label class="label">Hospital / Clinic</label><input class="input" value="City General Hospital" /></div>
+          <div><label class="label">Department</label><input class="input" value="Department of Cardiology" /></div>
+        </div>
+        <div class="form-row">
+          <div><label class="label">Years of Experience</label><input class="input" type="number" value="15" /></div>
+          <div><label class="label">Phone</label><input class="input" value="+1 (555) 234-5678" /></div>
+        </div>
+        <div class="form-row">
+          <div><label class="label">Email</label><input class="input" value="dr.okonkwo@cityhospital.com" /></div>
+          <div><label class="label">Website</label><input class="input" placeholder="https://hospital.com/dr-okonkwo" /></div>
+        </div>
+        <div class="form-group">
+          <label class="label">Biography</label>
+          <textarea class="textarea">Dr. Amara Okonkwo is a board-certified cardiologist with over 15 years of experience in interventional cardiology. She specializes in minimally invasive cardiac procedures and has performed over 2,000 successful heart procedures.</textarea>
+        </div>
+        <div style="display:flex;justify-content:flex-end;">
+          <button class="btn btn-primary btn-lg">Create Doctor Profile</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     SCREEN 6 — GENERATE WIZARD
+════════════════════════════════ -->
+<div id="generate" class="screen">
+  <div class="sidebar">
+    <div class="sidebar-logo"><div class="logo-icon"><svg width="18" height="18" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2L12 8M8 5L16 5M6 10h12l-1 9H7L6 10z"/></svg></div><div><p style="font-size:13px;font-weight:700;color:#1E3A8A;line-height:1;">DocIdentity</p></div></div>
+    <div class="sidebar-nav"><a class="nav-item">Dashboard</a><a class="nav-item">Doctors</a><a class="nav-item">Templates</a><a class="nav-item active">Generate</a><a class="nav-item">History</a></div>
+    <div class="sidebar-user"><div class="user-avatar">DH</div><div class="min-w-0 flex-1"><p style="font-size:12px;font-weight:600;color:#1E293B;">Demo Hospital</p></div></div>
+  </div>
+  <div class="page-content" style="max-width:820px;">
+    <h1 class="text-2xl font-bold text-dark" style="margin-bottom:4px;">Generate Doctor Visual</h1>
+    <p class="text-sm text-muted" style="margin-bottom:20px;">Select a doctor and template to create branded visuals</p>
+
+    <!-- Stepper -->
+    <div class="flex items-center gap-2" style="margin-bottom:24px;">
+      <span class="step-badge step-done">✓ 1. Select Doctor</span>
+      <svg width="14" height="14" fill="none" stroke="#CBD5E1" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      <span class="step-badge step-done">✓ 2. Choose Template</span>
+      <svg width="14" height="14" fill="none" stroke="#CBD5E1" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      <span class="step-badge step-active">3. Generate</span>
+    </div>
+
+    <!-- Summary cards -->
+    <div class="grid grid-2 gap-4" style="margin-bottom:20px;">
+      <div class="card">
+        <div class="card-header" style="padding-bottom:10px;"><span class="card-title text-xs">Selected Doctor</span></div>
+        <div class="card-body" style="padding-top:0;">
+          <div class="flex gap-3 items-center">
+            <div class="doctor-photo" style="width:44px;height:44px;border-radius:10px;font-size:18px;">A</div>
+            <div>
+              <p class="font-semibold text-dark" style="font-size:14px;">Dr. Amara Okonkwo</p>
+              <p class="text-xs" style="color:#2563EB;">Cardiology</p>
+              <p class="text-xs text-muted">City General Hospital · 3 photos</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header" style="padding-bottom:10px;"><span class="card-title text-xs">Selected Template</span></div>
+        <div class="card-body" style="padding-top:0;">
+          <p class="font-semibold text-dark" style="font-size:14px;margin-bottom:4px;">Professional Profile Card</p>
+          <span class="badge badge-blue" style="margin-bottom:6px;">PROFILE CARD</span>
+          <p class="text-xs text-muted">800×600px · PNG, JPG · 300 DPI</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Identity preservation notice -->
+    <div class="identity-box" style="margin-bottom:20px;">
+      <p class="font-semibold" style="font-size:13px;color:#0C4A6E;margin-bottom:12px;">
+        <svg width="16" height="16" fill="none" stroke="#0284C7" stroke-width="2" viewBox="0 0 24 24" style="display:inline;vertical-align:middle;margin-right:6px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Identity Preservation Active
+      </p>
+      <div class="identity-check"><div class="check-icon"><svg width="10" height="10" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div> Doctor face shape & features locked</div>
+      <div class="identity-check"><div class="check-icon"><svg width="10" height="10" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div> Skin tone and complexion preserved</div>
+      <div class="identity-check"><div class="check-icon"><svg width="10" height="10" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div> Age-accurate rendering guaranteed</div>
+      <div class="identity-check"><div class="check-icon"><svg width="10" height="10" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div> No generic or altered face generation</div>
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;">
+      <button class="btn btn-primary btn-lg" style="padding:14px 32px;font-size:15px;">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 3l1.5 4.5H18l-3.75 2.75 1.5 4.5L12 12.5l-3.75 2.25 1.5-4.5L6 7.5h4.5L12 3z"/></svg>
+        Generate Visual
+      </button>
+    </div>
+
+    <!-- Output preview (post-generation) -->
+    <div style="margin-top:28px;padding-top:28px;border-top:1px solid #E2E8F0;">
+      <div class="flex items-center gap-3" style="margin-bottom:18px;">
+        <div style="width:38px;height:38px;background:#DCFCE7;border-radius:50%;display:flex;align-items:center;justify-content:center;">
+          <svg width="20" height="20" fill="none" stroke="#16A34A" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div>
+          <h2 class="font-bold text-dark" style="font-size:17px;">Generation Complete!</h2>
+          <p class="text-sm text-muted">Your doctor visual is ready to download</p>
+        </div>
+      </div>
+      <div class="output-card">
+        <div class="output-preview">
+          <div class="output-overlay"></div>
+          <!-- Simulated output visual -->
+          <div style="position:relative;z-index:1;display:flex;gap:20px;align-items:center;padding:20px;">
+            <div style="width:80px;height:100px;background:rgba(255,255,255,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:700;color:#fff;">A</div>
+            <div>
+              <p style="font-size:22px;font-weight:700;color:#fff;">Dr. Amara Okonkwo</p>
+              <p style="font-size:14px;color:#93C5FD;margin-top:4px;">Cardiology</p>
+              <p style="font-size:12px;color:#CBD5E1;">City General Hospital</p>
+              <p style="font-size:11px;color:#93C5FD;margin-top:8px;">15+ Years Experience</p>
+            </div>
+          </div>
+        </div>
+        <div style="padding:16px 20px;background:#F8FAFC;display:flex;gap:10px;align-items:center;">
+          <button class="btn btn-primary btn-sm"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg> Download PNG</button>
+          <button class="btn btn-outline btn-sm"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg> Download JPG</button>
+          <span class="text-xs text-muted" style="margin-left:auto;">Generated in 8.3s · 800×600px · 300 DPI</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     SCREEN 7 — GENERATION HISTORY
+════════════════════════════════ -->
+<div id="generations" class="screen">
+  <div class="sidebar">
+    <div class="sidebar-logo"><div class="logo-icon"><svg width="18" height="18" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2L12 8M8 5L16 5M6 10h12l-1 9H7L6 10z"/></svg></div><div><p style="font-size:13px;font-weight:700;color:#1E3A8A;line-height:1;">DocIdentity</p></div></div>
+    <div class="sidebar-nav"><a class="nav-item">Dashboard</a><a class="nav-item">Doctors</a><a class="nav-item">Templates</a><a class="nav-item">Generate</a><a class="nav-item active">History</a></div>
+    <div class="sidebar-user"><div class="user-avatar">DH</div></div>
+  </div>
+  <div class="page-content">
+    <div class="flex items-center justify-between" style="margin-bottom:20px;">
+      <div><h1 class="text-2xl font-bold text-dark">Generation History</h1><p class="text-sm text-muted" style="margin-top:3px;">47 total generations</p></div>
+      <button class="btn btn-primary"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 3l1.5 4.5H18l-3.75 2.75 1.5 4.5L12 12.5l-3.75 2.25 1.5-4.5L6 7.5h4.5L12 3z"/></svg> New Generation</button>
+    </div>
+    <!-- Filters -->
+    <div class="flex gap-2" style="margin-bottom:18px;">
+      <button class="btn btn-primary btn-sm">All</button>
+      <button class="btn btn-outline btn-sm">Completed</button>
+      <button class="btn btn-outline btn-sm">Processing</button>
+      <button class="btn btn-outline btn-sm">Failed</button>
+    </div>
+    <!-- Table -->
+    <div class="card" style="overflow:hidden;">
+      <table class="table">
+        <thead><tr><th>Doctor</th><th>Template</th><th>Date</th><th>Time</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><p class="font-medium text-dark">Dr. Amara Okonkwo</p><p class="text-xs text-muted">Cardiology</p></td>
+            <td><p class="text-sm text-dark">Professional Profile Card</p></td>
+            <td><p class="text-sm text-muted">May 11, 2025</p></td>
+            <td><p class="text-sm text-muted">8.3s</p></td>
+            <td><span class="badge badge-green">completed</span></td>
+            <td><div class="flex gap-2">
+              <button class="btn btn-outline btn-sm"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg> PNG</button>
+              <button class="btn btn-outline btn-sm">JPG</button>
+            </div></td>
+          </tr>
+          <tr>
+            <td><p class="font-medium text-dark">Dr. Raj Patel</p><p class="text-xs text-muted">Neurology</p></td>
+            <td><p class="text-sm text-dark">Hospital Website Banner</p></td>
+            <td><p class="text-sm text-muted">May 11, 2025</p></td>
+            <td><p class="text-sm text-muted">—</p></td>
+            <td><span class="badge badge-blue">processing</span></td>
+            <td><button class="btn btn-ghost btn-sm text-muted">View</button></td>
+          </tr>
+          <tr>
+            <td><p class="font-medium text-dark">Dr. Sofia Mendez</p><p class="text-xs text-muted">Orthopedic Surgery</p></td>
+            <td><p class="text-sm text-dark">Medical Brochure Panel</p></td>
+            <td><p class="text-sm text-muted">May 10, 2025</p></td>
+            <td><p class="text-sm text-muted">12.1s</p></td>
+            <td><span class="badge badge-green">completed</span></td>
+            <td><div class="flex gap-2">
+              <button class="btn btn-outline btn-sm">PNG</button>
+              <button class="btn btn-outline btn-sm">PDF</button>
+            </div></td>
+          </tr>
+          <tr>
+            <td><p class="font-medium text-dark">Dr. Amara Okonkwo</p><p class="text-xs text-muted">Cardiology</p></td>
+            <td><p class="text-sm text-dark">Presentation Slide</p></td>
+            <td><p class="text-sm text-muted">May 10, 2025</p></td>
+            <td><p class="text-sm text-muted">—</p></td>
+            <td><span class="badge badge-red">failed</span></td>
+            <td><button class="btn btn-ghost btn-sm text-muted">Retry</button></td>
+          </tr>
+          <tr>
+            <td><p class="font-medium text-dark">Dr. James Wilson</p><p class="text-xs text-muted">Pediatrics</p></td>
+            <td><p class="text-sm text-dark">Social Media Post</p></td>
+            <td><p class="text-sm text-muted">May 9, 2025</p></td>
+            <td><p class="text-sm text-muted">5.7s</p></td>
+            <td><span class="badge badge-green">completed</span></td>
+            <td><div class="flex gap-2"><button class="btn btn-outline btn-sm">JPG</button></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     SCREEN 8 — TEMPLATES
+════════════════════════════════ -->
+<div id="templates-page" class="screen">
+  <div class="sidebar">
+    <div class="sidebar-logo"><div class="logo-icon"><svg width="18" height="18" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2L12 8M8 5L16 5M6 10h12l-1 9H7L6 10z"/></svg></div><div><p style="font-size:13px;font-weight:700;color:#1E3A8A;line-height:1;">DocIdentity</p></div></div>
+    <div class="sidebar-nav"><a class="nav-item">Dashboard</a><a class="nav-item">Doctors</a><a class="nav-item active">Templates</a><a class="nav-item">Generate</a></div>
+    <div class="sidebar-user"><div class="user-avatar">DH</div></div>
+  </div>
+  <div class="page-content">
+    <div style="margin-bottom:20px;"><h1 class="text-2xl font-bold text-dark">Templates</h1><p class="text-sm text-muted" style="margin-top:3px;">5 professionally designed doctor visual templates</p></div>
+    <div class="flex gap-2" style="margin-bottom:20px;">
+      <button class="btn btn-primary btn-sm">All Templates</button>
+      <button class="btn btn-outline btn-sm">Profile Card</button>
+      <button class="btn btn-outline btn-sm">Banner</button>
+      <button class="btn btn-outline btn-sm">Brochure</button>
+      <button class="btn btn-outline btn-sm">Slide</button>
+      <button class="btn btn-outline btn-sm">Social</button>
+    </div>
+    <div class="grid grid-3 gap-5">
+      <div class="template-card">
+        <div class="template-preview" style="background:linear-gradient(135deg,#F8FAFC,#EFF6FF);">
+          <div style="display:flex;gap:16px;padding:16px;align-items:center;">
+            <div style="width:54px;height:70px;background:#DBEAFE;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:#2563EB;">A</div>
+            <div><p style="font-size:13px;font-weight:700;color:#1E3A8A;">Dr. A. Okonkwo</p><p style="font-size:10px;color:#2563EB;margin-top:2px;">Cardiology</p><p style="font-size:9px;color:#64748B;">City General Hospital</p></div>
+          </div>
+        </div>
+        <div style="padding:14px 16px;">
+          <div class="flex items-center justify-between" style="margin-bottom:6px;"><span class="font-semibold text-dark" style="font-size:13px;">Professional Profile Card</span><span class="badge badge-gray" style="font-size:10px;">Free</span></div>
+          <p class="text-xs text-muted" style="margin-bottom:10px;">Corporate medical profile for websites and directories</p>
+          <div class="flex items-center justify-between text-xs text-muted" style="margin-bottom:10px;"><span>800×600px</span><span>PNG, JPG · 300 DPI</span></div>
+          <span class="badge badge-blue" style="font-size:10px;margin-bottom:10px;display:inline-block;">PROFILE CARD</span>
+          <button class="btn btn-primary btn-sm w-full" style="justify-content:center;">Use Template</button>
+        </div>
+      </div>
+      <div class="template-card">
+        <div class="template-preview" style="background:linear-gradient(135deg,#1E3A8A,#2563EB);">
+          <div style="padding:16px;text-align:left;width:100%;">
+            <p style="font-size:16px;font-weight:700;color:#fff;">Dr. Amara Okonkwo</p>
+            <p style="font-size:10px;color:#93C5FD;margin-top:3px;">Cardiology · City General Hospital</p>
+          </div>
+        </div>
+        <div style="padding:14px 16px;">
+          <div class="flex items-center justify-between" style="margin-bottom:6px;"><span class="font-semibold text-dark" style="font-size:13px;">Hospital Website Banner</span><span class="badge badge-gray" style="font-size:10px;">Free</span></div>
+          <p class="text-xs text-muted" style="margin-bottom:10px;">Wide banner for hospital websites and landing pages</p>
+          <div class="flex items-center justify-between text-xs text-muted" style="margin-bottom:10px;"><span>1400×500px</span><span>PNG, JPG · 150 DPI</span></div>
+          <span class="badge badge-purple" style="font-size:10px;margin-bottom:10px;display:inline-block;">BANNER</span>
+          <button class="btn btn-primary btn-sm w-full" style="justify-content:center;">Use Template</button>
+        </div>
+      </div>
+      <div class="template-card">
+        <div class="template-preview" style="background:#fff;border-bottom:1px solid #E2E8F0;">
+          <div style="padding:14px;text-align:center;width:100%;">
+            <div style="width:52px;height:64px;background:#DBEAFE;border-radius:6px;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#2563EB;">A</div>
+            <p style="font-size:12px;font-weight:700;color:#1E3A8A;">Dr. Amara Okonkwo</p>
+            <p style="font-size:9px;color:#2563EB;">Cardiology</p>
+          </div>
+        </div>
+        <div style="padding:14px 16px;">
+          <div class="flex items-center justify-between" style="margin-bottom:6px;"><span class="font-semibold text-dark" style="font-size:13px;">Medical Brochure Panel</span><span class="badge badge-premium" style="font-size:10px;">Pro</span></div>
+          <p class="text-xs text-muted" style="margin-bottom:10px;">A4 print-ready brochure panel with PDF export</p>
+          <div class="flex items-center justify-between text-xs text-muted" style="margin-bottom:10px;"><span>595×842px (A4)</span><span>PNG, PDF · 300 DPI</span></div>
+          <span class="badge badge-green" style="font-size:10px;margin-bottom:10px;display:inline-block;">BROCHURE</span>
+          <button class="btn btn-primary btn-sm w-full" style="justify-content:center;">Use Template</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     SCREEN 9 — ADMIN DASHBOARD
+════════════════════════════════ -->
+<div id="admin-page" class="screen">
+  <div class="sidebar">
+    <div class="sidebar-logo"><div class="logo-icon"><svg width="18" height="18" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2L12 8M8 5L16 5M6 10h12l-1 9H7L6 10z"/></svg></div><div><p style="font-size:13px;font-weight:700;color:#1E3A8A;line-height:1;">DocIdentity</p></div></div>
+    <div class="sidebar-nav">
+      <a class="nav-item">Dashboard</a>
+      <div class="nav-section">Administration</div>
+      <a class="nav-item active"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Admin Panel</a>
+      <a class="nav-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>Users</a>
+      <a class="nav-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Templates</a>
+      <a class="nav-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>Themes</a>
+      <a class="nav-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>Settings</a>
+    </div>
+    <div class="sidebar-user"><div class="user-avatar" style="background:#7C3AED;">SA</div><div class="min-w-0 flex-1"><p style="font-size:12px;font-weight:600;color:#1E293B;">System Admin</p><p style="font-size:11px;color:#94A3B8;">SUPER_ADMIN</p></div></div>
+  </div>
+  <div class="page-content">
+    <div style="margin-bottom:24px;"><h1 class="text-2xl font-bold text-dark">Admin Dashboard</h1><p class="text-sm text-muted" style="margin-top:3px;">Platform overview and management</p></div>
+
+    <!-- Stats grid -->
+    <div class="grid grid-4 gap-4" style="margin-bottom:24px;">
+      <div class="stat-card">
+        <div class="flex items-center justify-between">
+          <div><div class="stat-value">248</div><div class="stat-label">Total Users</div></div>
+          <div class="stat-icon" style="background:#EFF6FF;"><svg width="22" height="22" fill="none" stroke="#2563EB" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="flex items-center justify-between">
+          <div><div class="stat-value">1,847</div><div class="stat-label">Total Doctors</div></div>
+          <div class="stat-icon" style="background:#F3E8FF;"><svg width="22" height="22" fill="none" stroke="#7C3AED" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2L12 8M8 5L16 5M6 10h12l-1 9H7L6 10z"/></svg></div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="flex items-center justify-between">
+          <div><div class="stat-value">9,423</div><div class="stat-label">Total Generations</div></div>
+          <div class="stat-icon" style="background:#DCFCE7;"><svg width="22" height="22" fill="none" stroke="#16A34A" stroke-width="2" viewBox="0 0 24 24"><path d="M12 3l1.5 4.5H18l-3.75 2.75 1.5 4.5L12 12.5l-3.75 2.25 1.5-4.5L6 7.5h4.5L12 3z"/></svg></div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="flex items-center justify-between">
+          <div><div class="stat-value">7</div><div class="stat-label">Processing Now</div></div>
+          <div class="stat-icon" style="background:#FEF3C7;"><svg width="22" height="22" fill="none" stroke="#D97706" stroke-width="2" viewBox="0 0 24 24"><polyline points="12 8 12 12 14 14"/><circle cx="12" cy="12" r="10"/></svg></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick links -->
+    <div class="grid grid-4 gap-3" style="margin-bottom:24px;">
+      <div class="card" style="padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:10px;">
+        <svg width="18" height="18" fill="none" stroke="#2563EB" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        <span class="text-sm font-medium text-dark">Manage Users</span>
+      </div>
+      <div class="card" style="padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:10px;">
+        <svg width="18" height="18" fill="none" stroke="#2563EB" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        <span class="text-sm font-medium text-dark">Templates</span>
+      </div>
+      <div class="card" style="padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:10px;">
+        <svg width="18" height="18" fill="none" stroke="#2563EB" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg>
+        <span class="text-sm font-medium text-dark">Hospital Themes</span>
+      </div>
+      <div class="card" style="padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:10px;">
+        <svg width="18" height="18" fill="none" stroke="#2563EB" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14"/></svg>
+        <span class="text-sm font-medium text-dark">Settings</span>
+      </div>
+    </div>
+
+    <!-- Recent generations table -->
+    <div class="card" style="overflow:hidden;">
+      <div class="flex items-center justify-between" style="padding:16px 20px;border-bottom:1px solid #F1F5F9;">
+        <span class="font-semibold text-dark">Recent Platform Generations</span>
+        <button class="btn btn-ghost btn-sm">View all</button>
+      </div>
+      <table class="table">
+        <thead><tr><th>Doctor · Template</th><th>User</th><th>Hospital</th><th>Time</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><p class="font-medium text-dark" style="font-size:12px;">Dr. Amara Okonkwo · Profile Card</p></td>
+            <td><p class="text-xs text-muted">demo@hospital.com</p></td>
+            <td><p class="text-xs text-muted">City General</p></td>
+            <td><p class="text-xs text-muted">2 min ago</p></td>
+            <td><span class="badge badge-green">completed</span></td>
+          </tr>
+          <tr>
+            <td><p class="font-medium text-dark" style="font-size:12px;">Dr. Raj Patel · Banner</p></td>
+            <td><p class="text-xs text-muted">admin2@metro.com</p></td>
+            <td><p class="text-xs text-muted">Metro Medical</p></td>
+            <td><p class="text-xs text-muted">5 min ago</p></td>
+            <td><span class="badge badge-blue">processing</span></td>
+          </tr>
+          <tr>
+            <td><p class="font-medium text-dark" style="font-size:12px;">Dr. James Wilson · Slide</p></td>
+            <td><p class="text-xs text-muted">radiology@stmary.com</p></td>
+            <td><p class="text-xs text-muted">St. Mary's</p></td>
+            <td><p class="text-xs text-muted">11 min ago</p></td>
+            <td><span class="badge badge-green">completed</span></td>
+          </tr>
+          <tr>
+            <td><p class="font-medium text-dark" style="font-size:12px;">Dr. Sofia Mendez · Brochure</p></td>
+            <td><p class="text-xs text-muted">demo@hospital.com</p></td>
+            <td><p class="text-xs text-muted">City General</p></td>
+            <td><p class="text-xs text-muted">23 min ago</p></td>
+            <td><span class="badge badge-red">failed</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+function show(id, btn) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+</script>
+</body>
+</html>
